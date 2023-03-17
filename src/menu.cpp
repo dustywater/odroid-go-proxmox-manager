@@ -2,11 +2,19 @@
 #include <Arduino.h>
 #include <odroid_go.h>
 #include <ArduinoJson.h>
-#include <global.h>
 #include <statistics.h>
+#include <global.h>
+
+const int MAIN_TEXT_COLOR = WHITE;
+const int MAIN_TEXT_SIZE = 2;
+
 
 int selectedItem = 0;
 String selectedNode = "";
+int selectedLXC = 0;
+int selectedVM = 0;
+
+
 
 
 
@@ -24,10 +32,12 @@ int buttonListener(int numItems) {
     GO.update();
     if (GO.JOY_Y.isAxisPressed() == 1 && selectedItem < (numItems - 1)) {
       selectedItem++;
+      Serial.println(selectedItem);
       break;
     }
     if (GO.JOY_Y.isAxisPressed() == 2 && selectedItem > 0) {
       selectedItem--;
+      Serial.println(selectedItem);
       break;
     }
     if (GO.BtnA.isPressed() == 1) {
@@ -46,6 +56,8 @@ int buttonListener(int numItems) {
 void drawMenu(MenuItem menuItems[], int numItems) {
   GO.lcd.clearDisplay();
   GO.lcd.setCursor(0, 0);
+  GO.lcd.setTextColor(MAIN_TEXT_COLOR);
+  GO.lcd.setTextSize(MAIN_TEXT_SIZE);
   
 
   for (int i = 0; i < numItems; i++) {
@@ -65,6 +77,7 @@ void drawMenu(MenuItem menuItems[], int numItems) {
       break;
     default:
       drawMenu(menuItems, numItems);
+      break;
   }
 
 }
@@ -74,56 +87,84 @@ void mainMenu(){
     drawMenu(mainMenuItems, numItems);
 }
 
-void listNodes(JsonArray nodes) {
+void listNodes(Node* nodes, int numItems) {
   GO.lcd.clearDisplay();
+  GO.lcd.setTextColor(MAIN_TEXT_COLOR);
+  GO.lcd.setTextSize(MAIN_TEXT_SIZE);
   GO.lcd.setCursor(0, 0);
-  int numItems = nodes.size();
+
   for (int i = 0; i < numItems; i++) {
     if (selectedItem == i) {
       GO.lcd.print("> ");
     }
-    GO.lcd.println(nodes[i]["node"].as<String>());
+    GO.lcd.println(nodes[i].name);
   }
 
   switch (buttonListener(numItems)) {
     case 1:
       Serial.println("selected " + selectedItem);
-      selectedNode = nodes[selectedItem]["node"].as<String>();
+      selectedNode = nodes[selectedItem].name;
       break;
     case 2:
       Serial.println("back");
       break;
     default:
-      listNodes(nodes);
+      listNodes(nodes, numItems);
+      break;
   }
 }
 
-int listContainers(JsonArray containers) {
+void listContainers(Container* containers, int numItems) {
   GO.lcd.clearDisplay();
   GO.lcd.setCursor(0, 0);
-  int numItems = containers.size();
-  int selectedLXC = 0;
+  GO.lcd.setTextColor(MAIN_TEXT_COLOR);
+  GO.lcd.setTextSize(MAIN_TEXT_SIZE);
+
   for (int i = 0; i < numItems; i++) {
     if (selectedItem == i) {
       GO.lcd.print("> ");
     }
-    GO.lcd.println(containers[i]["vmid"].as<String>() + ": " + containers[i]["name"].as<String>());
+    GO.lcd.println(String(containers[i].id) + ": " + containers[i].name);
   }
 
   switch (buttonListener(numItems)) {
     case 1:
-      selectedLXC = containers[selectedItem]["vmid"].as<int>();
-      Serial.println(selectedLXC);
+      selectedLXC = containers[selectedItem].id;
       break;
     case 2:
       Serial.println("back");
       break;
     default:
-      listContainers(containers);
+      listContainers(containers, numItems);
+      break;
   }
 
-  Serial.println(selectedLXC);
-  Serial.println("end");
-  return selectedLXC;
-  
+}
+
+
+void listVMs(VM* vms, int numItems) {
+  GO.lcd.clearDisplay();
+  GO.lcd.setCursor(0, 0);
+  GO.lcd.setTextColor(MAIN_TEXT_COLOR);
+  GO.lcd.setTextSize(MAIN_TEXT_SIZE);
+
+  for (int i = 0; i < numItems; i++) {
+    if (selectedItem == i) {
+      GO.lcd.print("> ");
+    }
+    GO.lcd.println(String(vms[i].id) + ": " + vms[i].name);
+  }
+
+  switch (buttonListener(numItems)) {
+    case 1:
+      selectedVM = vms[selectedItem].id;
+      break;
+    case 2:
+      Serial.println("back");
+      break;
+    default:
+      listVMs(vms, numItems);
+      break;
+  }
+
 }

@@ -7,22 +7,34 @@
 #include <menu.h>
 #include <json/retrieve.h>
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   GO.begin();
   connectWiFi();
 }
 
+void loop()
+{
 
-void loop() {
-
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED)
+  {
     displayError("WiFi Connection Lost");
     connectWiFi();
   }
-  listNodes(getNodeInfo());
-  selectedItem = 0;
-  mainMenu();
 
-  
+  try
+  {
+    int numNodes;
+    Node *nodes = getNodeInfo(&numNodes);
+    listNodes(nodes, numNodes);
+    selectedItem = 0;
+    mainMenu();
+  }
+  catch (const std::exception &e)
+  {
+    Serial.println(e.what());
+    displayError(e.what());
+  }
+
 }
