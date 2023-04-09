@@ -6,19 +6,6 @@
 #include <odroid_go.h>
 #include <utils.h>
 
-void nodeRestart()
-{
-    Serial.println("node restart");
-    selectedItem = 0;
-
-    restartNode(selectedNode);
-
-    GO.lcd.clearDisplay();
-    GO.lcd.println("done");
-
-    delay(2000);
-}
-
 void vmRestart()
 {
     Serial.println("vm restart");
@@ -28,13 +15,15 @@ void vmRestart()
     if (vms != NULL)
     {
         listVMs(vms, numVMs);
-
+        delete[] vms;
         restartVM(selectedNode, selectedVM);
 
         GO.lcd.clearDisplay();
+        GO.lcd.setCursor(0, 0);
         GO.lcd.println("done");
 
         delay(2000);
+        manageVMMenu();
     }
 }
 
@@ -47,8 +36,31 @@ void containerRestart()
     if (containers != NULL)
     {
         listContainers(containers, numContainers);
+        delete[] containers;
 
         restartContainer(selectedNode, selectedLXC);
+        GO.lcd.clearDisplay();
+        GO.lcd.setCursor(0, 0);
+        GO.lcd.println("done");
+
+        delay(2000);
+        manageContainerMenu();
+    }
+}
+
+
+void vmStart()
+{
+    Serial.println("vm start");
+    selectedItem = 0;
+    int numVMs;
+    VM *vms = getVMInfo(&numVMs, selectedNode);
+    if (vms != NULL)
+    {
+        listVMs(vms, numVMs);
+
+        startVM(selectedNode, selectedVM);
+
         GO.lcd.clearDisplay();
         GO.lcd.println("done");
 
@@ -56,104 +68,57 @@ void containerRestart()
     }
 }
 
+void containerStart()
+{
+    Serial.println("lxc start");
+    selectedItem = 0;
+    int numContainers;
+    Container *containers = getContainerInfo(&numContainers, selectedNode);
+    if (containers != NULL)
+    {
+        listContainers(containers, numContainers);
 
-// void nodeStart()
-// {
-//     Serial.println("node start");
-//     selectedItem = 0;
+        startContainer(selectedNode, selectedLXC);
+        GO.lcd.clearDisplay();
+        GO.lcd.println("done");
 
-//     startNode(selectedNode);
+        delay(2000);
+    }
+}
 
-//     GO.lcd.clearDisplay();
-//     GO.lcd.println("done");
+void vmStop()
+{
+    Serial.println("vm stop");
+    selectedItem = 0;
+    int numVMs;
+    VM *vms = getVMInfo(&numVMs, selectedNode);
+    if (vms != NULL)
+    {
+        listVMs(vms, numVMs);
 
-//     delay(2000);
-// }
+        stopVM(selectedNode, selectedVM);
 
-// void vmStart()
-// {
-//     Serial.println("vm start");
-//     selectedItem = 0;
-//     int numVMs;
-//     VM *vms = getVMInfo(&numVMs, selectedNode);
-//     if (vms != NULL)
-//     {
-//         listVMs(vms, numVMs);
+        GO.lcd.clearDisplay();
+        GO.lcd.println("done");
 
-//         startVM(selectedNode, selectedVM);
+        delay(2000);
+    }
+}
 
-//         GO.lcd.clearDisplay();
-//         GO.lcd.println("done");
+void containerStop()
+{
+    Serial.println("lxc stop");
+    selectedItem = 0;
+    int numContainers;
+    Container *containers = getContainerInfo(&numContainers, selectedNode);
+    if (containers != NULL)
+    {
+        listContainers(containers, numContainers);
 
-//         delay(2000);
-//     }
-// }
+        stopContainer(selectedNode, selectedLXC);
+        GO.lcd.clearDisplay();
+        GO.lcd.println("done");
 
-// void containerStart()
-// {
-//     Serial.println("lxc start");
-//     selectedItem = 0;
-//     int numContainers;
-//     Container *containers = getContainerInfo(&numContainers, selectedNode);
-//     if (containers != NULL)
-//     {
-//         listContainers(containers, numContainers);
-
-//         startContainer(selectedNode, selectedLXC);
-//         GO.lcd.clearDisplay();
-//         GO.lcd.println("done");
-
-//         delay(2000);
-//     }
-// }
-
-
-// void nodeStop()
-// {
-//     Serial.println("node stop");
-//     selectedItem = 0;
-
-//     stopNode(selectedNode);
-
-//     GO.lcd.clearDisplay();
-//     GO.lcd.println("done");
-
-//     delay(2000);
-// }
-
-// void vmStop()
-// {
-//     Serial.println("vm stop");
-//     selectedItem = 0;
-//     int numVMs;
-//     VM *vms = getVMInfo(&numVMs, selectedNode);
-//     if (vms != NULL)
-//     {
-//         listVMs(vms, numVMs);
-
-//         stopVM(selectedNode, selectedVM);
-
-//         GO.lcd.clearDisplay();
-//         GO.lcd.println("done");
-
-//         delay(2000);
-//     }
-// }
-
-// void containerStop()
-// {
-//     Serial.println("lxc stop");
-//     selectedItem = 0;
-//     int numContainers;
-//     Container *containers = getContainerInfo(&numContainers, selectedNode);
-//     if (containers != NULL)
-//     {
-//         listContainers(containers, numContainers);
-
-//         stopContainer(selectedNode, selectedLXC);
-//         GO.lcd.clearDisplay();
-//         GO.lcd.println("done");
-
-//         delay(2000);
-//     }
-// }
+        delay(2000);
+    }
+}

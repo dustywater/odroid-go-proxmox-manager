@@ -4,5 +4,7 @@
 
 void displayError(String message);
 void connectWiFi();
+bool enterPin();
+int pinListener();
 
 #endif /* UTILS_H */

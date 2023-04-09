@@ -5,6 +5,10 @@
 #include <odroid_go.h>
 #include <utils.h>
 
+const int BACKGROUND_COLOR = WHITE;
+const int TEXT_COLOR = BLACK;
+const int TEXT_SIZE = 2;
+
 String convertBytes(long long value) {
   if (value > 1099511627776) {
     return String(value / 1099511627776) + " TB";
@@ -34,17 +38,17 @@ String convertTime(long long value) {
 
 void printNodeStats(Node node)
 {
-  GO.lcd.fillScreen(WHITE);
+  GO.lcd.fillScreen(BACKGROUND_COLOR);
   GO.lcd.setCursor(0, 0);
-  GO.lcd.setTextColor(BLACK);
+  GO.lcd.setTextColor(TEXT_COLOR);
 
-  GO.lcd.setTextSize(3);
+  GO.lcd.setTextSize(TEXT_SIZE);
   GO.lcd.println(node.name);
-  GO.lcd.setTextSize(2);
+
   GO.lcd.println("--------------------------");
   GO.lcd.println("Status: " + node.onlineStatus);
   GO.lcd.println("Uptime: " + convertTime(node.uptime));
-  GO.lcd.println("CPU: " + String(node.cpu) + "%");
+  GO.lcd.println("CPU: " + String(node.cpu * 100) + "%");
   GO.lcd.println("Threads: " + String(node.threads));
   GO.lcd.println("RAM: " + convertBytes(node.mem));
   GO.lcd.println("Max RAM: " + convertBytes(node.maxmem));
@@ -55,13 +59,12 @@ void printNodeStats(Node node)
 void printContainerStats(Container container)
 {
 
-  GO.lcd.fillScreen(WHITE);
+  GO.lcd.fillScreen(BACKGROUND_COLOR);
   GO.lcd.setCursor(0, 0);
-  GO.lcd.setTextColor(BLACK);
+  GO.lcd.setTextColor(TEXT_COLOR);
 
-  GO.lcd.setTextSize(3);
+  GO.lcd.setTextSize(TEXT_SIZE);
   GO.lcd.println(String(container.id) + ": " + container.name);
-  GO.lcd.setTextSize(2);
   GO.lcd.println("--------------------------");
   GO.lcd.println("Status: " + container.onlineStatus);
   GO.lcd.println("Uptime: " + convertTime(container.uptime));
@@ -72,13 +75,11 @@ void printContainerStats(Container container)
 void printVMStats(VM vm)
 {
 
-  GO.lcd.fillScreen(WHITE);
+  GO.lcd.fillScreen(BACKGROUND_COLOR);
   GO.lcd.setCursor(0, 0);
-  GO.lcd.setTextColor(BLACK);
-
-  GO.lcd.setTextSize(3);
+  GO.lcd.setTextColor(TEXT_COLOR);
+  GO.lcd.setTextSize(TEXT_SIZE);
   GO.lcd.println(String(vm.id) + ": " + vm.name);
-  GO.lcd.setTextSize(2);
   GO.lcd.println("--------------------------");
   GO.lcd.println("Status: " + vm.onlineStatus);
   GO.lcd.println("Uptime: " + convertTime(vm.uptime));
@@ -86,48 +87,161 @@ void printVMStats(VM vm)
   GO.lcd.println("Max Disk: " + convertBytes(vm.maxdisk));
 }
 
+void printDiskStats(Disk disk)
+{
+
+  GO.lcd.fillScreen(BACKGROUND_COLOR);
+  GO.lcd.setCursor(0, 0);
+  GO.lcd.setTextColor(TEXT_COLOR);
+  GO.lcd.setTextSize(TEXT_SIZE);
+
+  GO.lcd.println(disk.devpath);
+  GO.lcd.println("--------------------------");
+  GO.lcd.println("Vendor: " + disk.vendor);
+  GO.lcd.println("Model: " + disk.model);
+  GO.lcd.println("Serial: " + disk.serial);
+  GO.lcd.println("Size: " + convertBytes(disk.size));
+  GO.lcd.println("Used For: " + disk.used);
+  GO.lcd.println("Health: " + disk.health);
+}
+
+void printPoolStats(Pool pool)
+{
+
+  GO.lcd.fillScreen(BACKGROUND_COLOR);
+  GO.lcd.setCursor(0, 0);
+  GO.lcd.setTextColor(TEXT_COLOR);
+  GO.lcd.setTextSize(TEXT_SIZE);
+
+  GO.lcd.println(pool.name);
+  GO.lcd.println("--------------------------");
+  GO.lcd.println("Free: " + convertBytes(pool.free));
+  GO.lcd.println("Size: " + convertBytes(pool.size));
+  GO.lcd.println("Health: " + pool.health);
+}
+
 void nodeInfo()
 {
   Serial.println("nodeinfo");
+  unsigned long lastUpdate = millis();
+  int updateInterval = 3000;
   while (true)
   {
+    if(lastUpdate + updateInterval < millis()) {
+      printNodeStats(getNode(selectedNode));
+      lastUpdate = millis();
+    }
 
-    printNodeStats(getNode(selectedNode));
-    delay(2000);
+    GO.update();
+    if(GO.BtnB.isPressed()) {
+      break;
+    }
   }
+  mainMenu();
 }
 
 void containerInfo()
 {
   Serial.println("container info");
   selectedItem = 0;
+  selectedPage = 0;
   int numContainers;
 
   Container *containers = getContainerInfo(&numContainers, selectedNode);
 
   listContainers(containers, numContainers);
+  delete[] containers;
+  unsigned long lastUpdate = millis();
+  int updateInterval = 3000;
 
   while (true)
   {
-    printContainerStats(getContainer(selectedLXC, selectedNode));
-    delay(5000);
+    if(lastUpdate + updateInterval < millis()) {
+      printContainerStats(getContainer(selectedLXC, selectedNode));
+      lastUpdate = millis();
+    }
+
+    GO.update();
+    if(GO.BtnB.isPressed()) {
+      mainMenu();
+      break;
+    }
   }
+  
 }
 
 void vmInfo()
 {
   Serial.println("vm info");
   selectedItem = 0;
+  selectedPage = 0;
   int numVMs;
   VM *vms = getVMInfo(&numVMs, selectedNode);
   if (vms != NULL)
   {
     listVMs(vms, numVMs);
-
+    delete[] vms;
+    unsigned long lastUpdate = millis();
+    int updateInterval = 3000;
     while (true)
     {
-      printVMStats(getVM(selectedVM, selectedNode));
-      delay(5000);
+      if(lastUpdate + updateInterval < millis()) {
+          printVMStats(getVM(selectedVM, selectedNode));
+          lastUpdate = millis();
+      }
+      GO.update();
+      if(GO.BtnB.isPressed()) {
+        mainMenu();
+        break;
+      } 
+    }
+  }
+}
+
+void diskInfo()
+{
+  Serial.println("disk info");
+  selectedItem = 0;
+  selectedPage = 0;
+  int numDisks;
+  Disk *disks = getDiskInfo(&numDisks, selectedNode);
+  if (disks != NULL)
+  {
+    listDisks(disks, numDisks);
+    delete[] disks;
+
+    printDiskStats(getDisk(selectedDisk, selectedNode));
+    while (true)
+    {      
+      GO.update();
+      if(GO.BtnB.isPressed()) {
+        mainMenu();
+        break;
+      } 
+    }
+  }
+}
+
+void poolInfo()
+{
+  Serial.println("pool info");
+  selectedItem = 0;
+  selectedPage = 0;
+  int numPools;
+  Pool *pools = getPoolInfo(&numPools, selectedNode);
+  if (pools != NULL)
+  {
+    listPools(pools, numPools);
+    delete[] pools;
+
+    printPoolStats(getPool(selectedPool, selectedNode));
+    while (true)
+    {      
+      GO.update();
+      if(GO.BtnB.isPressed()) {
+        mainMenu();
+        break;
+      } 
     }
   }
 }

@@ -12,8 +12,13 @@ typedef struct {
 void listNodes(Node* nodes, int numItems);
 void listContainers(Container* containers, int numItems);
 void listVMs(VM* vms, int numItems);
+void listDisks(Disk* disks, int numItems);
+void listPools(Pool* pools, int numItems);
 void mainMenu();
+void manageContainerMenu();
+void manageVMMenu();
 
 extern int selectedItem;
+extern int selectedPage;
 
 #endif

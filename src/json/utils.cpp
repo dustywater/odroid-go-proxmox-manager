@@ -50,3 +50,35 @@ VM getVM(int id, String node)
 
   throw std::runtime_error("Can't find the requested vm in the array");
 }
+
+Disk getDisk(String devpath, String node)
+{
+  int numDisks;
+
+  Disk *disks = getDiskInfo(&numDisks, node);
+  for (int i = 0; i < numDisks; i++)
+  {
+    if (disks[i].devpath == devpath)
+    {
+      return disks[i];
+    }
+  }
+
+  throw std::runtime_error("Can't find the requested disk in the array");
+}
+
+Pool getPool(String name, String node)
+{
+  int numPools;
+
+  Pool *pools = getPoolInfo(&numPools, node);
+  for (int i = 0; i < numPools; i++)
+  {
+    if (pools[i].name == name)
+    {
+      return pools[i];
+    }
+  }
+
+  throw std::runtime_error("Can't find the requested pool in the array");
+}

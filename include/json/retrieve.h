@@ -4,7 +4,7 @@
 
 typedef struct {
   String name;
-  int cpu;
+  float cpu;
   int threads;
   String onlineStatus;
   long long mem;
@@ -34,9 +34,29 @@ typedef struct {
   long long netout;
 } VM;
 
+
+typedef struct {
+  String devpath;
+  long long size;
+  String used;
+  String serial;
+  String model;
+  String vendor;
+  String health;
+} Disk;
+
+typedef struct {
+  String name;
+  long long free;
+  long long size;
+  String health;
+} Pool;
+
 Node *getNodeInfo(int *numNodes);
 Container *getContainerInfo(int *numContainers, String node);
 VM *getVMInfo(int *numVMs, String node);
+Disk *getDiskInfo(int *numDisks, String node);
+Pool *getPoolInfo(int *numPools, String node);
 
 
 #endif /* JSON_RETRIEVE_H */

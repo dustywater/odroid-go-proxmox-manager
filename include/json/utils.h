@@ -6,5 +6,7 @@
 Node getNode(String name);
 Container getContainer(int id, String node);
 VM getVM(int id, String node);
+Disk getDisk(String devpath, String node);
+Pool getPool(String name, String node);
 
 #endif /* JSON_UTILS_H */
