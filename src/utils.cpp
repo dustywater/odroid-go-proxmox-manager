@@ -2,6 +2,7 @@
 #include <wifi_info.h>
 #include <WiFi.h>
 #include <pin.h>
+#include <json/retrieve.h>
 /**
    Display an error on the screen
 */
@@ -18,6 +19,8 @@ void connectWiFi() {
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   GO.lcd.clearDisplay();
   GO.lcd.setCursor(0, 0);
+  GO.lcd.setTextColor(WHITE);
+  GO.lcd.setTextSize(2);
   GO.lcd.print("Connecting");
 
 
@@ -26,7 +29,6 @@ void connectWiFi() {
     Serial.print(".");
     GO.lcd.print(".");
   }
-
 }
 
 

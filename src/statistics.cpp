@@ -9,28 +9,35 @@ const int BACKGROUND_COLOR = WHITE;
 const int TEXT_COLOR = BLACK;
 const int TEXT_SIZE = 2;
 
-String convertBytes(long long value) {
-  if (value > 1099511627776) {
+String convertBytes(long long value)
+{
+  if (value > 1099511627776)
+  {
     return String(value / 1099511627776) + " TB";
   }
-  if (value > 1073741824) {
+  if (value > 1073741824)
+  {
     return String(value / 1073741824) + " GB";
   }
-  if (value > 1048576) {
+  if (value > 1048576)
+  {
     return String(value / 1048576) + " MB";
   }
-  if (value > 1024) {
+  if (value > 1024)
+  {
     return String(value / 1024) + " KB";
   }
   return String(value) + " Bytes";
 }
 
-
-String convertTime(long long value) {
-  if (value > 3600) {
+String convertTime(long long value)
+{
+  if (value > 3600)
+  {
     return String(value / 3600) + " hrs";
   }
-  if (value > 60) {
+  if (value > 60)
+  {
     return String(value / 60) + " mins";
   }
   return String(value) + " secs";
@@ -127,13 +134,15 @@ void nodeInfo()
   int updateInterval = 3000;
   while (true)
   {
-    if(lastUpdate + updateInterval < millis()) {
+    if (lastUpdate + updateInterval < millis())
+    {
       printNodeStats(getNode(selectedNode));
       lastUpdate = millis();
     }
 
     GO.update();
-    if(GO.BtnB.isPressed()) {
+    if (GO.BtnB.isPressed())
+    {
       break;
     }
   }
@@ -156,18 +165,19 @@ void containerInfo()
 
   while (true)
   {
-    if(lastUpdate + updateInterval < millis()) {
+    if (lastUpdate + updateInterval < millis())
+    {
       printContainerStats(getContainer(selectedLXC, selectedNode));
       lastUpdate = millis();
     }
 
     GO.update();
-    if(GO.BtnB.isPressed()) {
+    if (GO.BtnB.isPressed())
+    {
       mainMenu();
       break;
     }
   }
-  
 }
 
 void vmInfo()
@@ -177,23 +187,22 @@ void vmInfo()
   selectedPage = 0;
   int numVMs;
   VM *vms = getVMInfo(&numVMs, selectedNode);
-  if (vms != NULL)
+  listVMs(vms, numVMs);
+  delete[] vms;
+  unsigned long lastUpdate = millis();
+  int updateInterval = 3000;
+  while (true)
   {
-    listVMs(vms, numVMs);
-    delete[] vms;
-    unsigned long lastUpdate = millis();
-    int updateInterval = 3000;
-    while (true)
+    if (lastUpdate + updateInterval < millis())
     {
-      if(lastUpdate + updateInterval < millis()) {
-          printVMStats(getVM(selectedVM, selectedNode));
-          lastUpdate = millis();
-      }
-      GO.update();
-      if(GO.BtnB.isPressed()) {
-        mainMenu();
-        break;
-      } 
+      printVMStats(getVM(selectedVM, selectedNode));
+      lastUpdate = millis();
+    }
+    GO.update();
+    if (GO.BtnB.isPressed())
+    {
+      mainMenu();
+      break;
     }
   }
 }
@@ -205,19 +214,18 @@ void diskInfo()
   selectedPage = 0;
   int numDisks;
   Disk *disks = getDiskInfo(&numDisks, selectedNode);
-  if (disks != NULL)
-  {
-    listDisks(disks, numDisks);
-    delete[] disks;
 
-    printDiskStats(getDisk(selectedDisk, selectedNode));
-    while (true)
-    {      
-      GO.update();
-      if(GO.BtnB.isPressed()) {
-        mainMenu();
-        break;
-      } 
+  listDisks(disks, numDisks);
+  delete[] disks;
+
+  printDiskStats(getDisk(selectedDisk, selectedNode));
+  while (true)
+  {
+    GO.update();
+    if (GO.BtnB.isPressed())
+    {
+      mainMenu();
+      break;
     }
   }
 }
@@ -229,19 +237,18 @@ void poolInfo()
   selectedPage = 0;
   int numPools;
   Pool *pools = getPoolInfo(&numPools, selectedNode);
-  if (pools != NULL)
-  {
-    listPools(pools, numPools);
-    delete[] pools;
 
-    printPoolStats(getPool(selectedPool, selectedNode));
-    while (true)
-    {      
-      GO.update();
-      if(GO.BtnB.isPressed()) {
-        mainMenu();
-        break;
-      } 
+  listPools(pools, numPools);
+  delete[] pools;
+
+  printPoolStats(getPool(selectedPool, selectedNode));
+  while (true)
+  {
+    GO.update();
+    if (GO.BtnB.isPressed())
+    {
+      mainMenu();
+      break;
     }
   }
 }

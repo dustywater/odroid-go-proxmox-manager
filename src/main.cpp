@@ -6,7 +6,7 @@
 #include <utils.h>
 #include <menu.h>
 #include <json/retrieve.h>
-
+#include <pin.h>
 
 void loop()
 {
@@ -38,11 +38,17 @@ void setup()
   Serial.begin(115200);
   GO.begin();
   GO.lcd.setTextWrap(false);
-  bool pinCorrect = false;
-  while (!pinCorrect) {
-    pinCorrect = enterPin();
+  if (LOCK_PIN != "")
+  {
+    bool pinCorrect = false;
+    while (!pinCorrect)
+    {
+      pinCorrect = enterPin();
+    }
+  } else {
+    displayError("Warning: No pin set");
   }
+
   connectWiFi();
   Serial.println("done setup");
 }
-

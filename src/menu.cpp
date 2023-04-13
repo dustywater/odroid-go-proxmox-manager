@@ -6,9 +6,12 @@
 #include <global.h>
 #include <manage.h>
 
+
 const int MAIN_TEXT_COLOR = WHITE;
 const int MAIN_TEXT_SIZE = 2;
 const int ITEMS_PER_PAGE = 12;
+const int OFFLINE_COLOR = RED;
+const int ONLINE_COLOR = GREEN;
 
 int selectedItem = 0;
 int selectedPage = 0;
@@ -123,6 +126,7 @@ void drawMenu(MenuItem menuItems[], int numItems, String menuTitle)
 
 void mainMenu()
 {
+  selectedItem = 0;
   int numItems = sizeof(mainMenuItems) / sizeof(MenuItem);
   drawMenu(mainMenuItems, numItems, "Main Menu");
 }
@@ -155,22 +159,24 @@ void listNodes(Node *nodes, int numItems)
 
   for (int i = selectedPage * ITEMS_PER_PAGE; i < numItems && i < (selectedPage + 1) * ITEMS_PER_PAGE; i++)
   {
-    Serial.println("running loop");
     if (selectedItem == i)
     {
       GO.lcd.print("> ");
     }
+    if (nodes[i].onlineStatus == "online") {
+      GO.lcd.setTextColor(ONLINE_COLOR);
+    } else {
+      GO.lcd.setTextColor(OFFLINE_COLOR);
+    }
+    GO.lcd.print("O");
+    GO.lcd.setTextColor(MAIN_TEXT_COLOR);
     GO.lcd.println(nodes[i].name);
   }
-  Serial.println("completed loop");
   switch (buttonListener(numItems))
   {
   case 1:
     Serial.println("selected " + selectedItem);
     selectedNode = nodes[selectedItem].name;
-    break;
-  case 2:
-    Serial.println("back");
     break;
   default:
     listNodes(nodes, numItems);
@@ -193,6 +199,13 @@ void listContainers(Container *containers, int numItems)
     {
       GO.lcd.print("> ");
     }
+    if (containers[i].onlineStatus == "running") {
+      GO.lcd.setTextColor(ONLINE_COLOR);
+    } else {
+      GO.lcd.setTextColor(OFFLINE_COLOR);
+    }
+    GO.lcd.print("O");
+    GO.lcd.setTextColor(MAIN_TEXT_COLOR);
     GO.lcd.println(String(containers[i].id) + ": " + containers[i].name);
   }
 
@@ -225,6 +238,13 @@ void listVMs(VM *vms, int numItems)
     {
       GO.lcd.print("> ");
     }
+    if (vms[i].onlineStatus == "running") {
+      GO.lcd.setTextColor(ONLINE_COLOR);
+    } else {
+      GO.lcd.setTextColor(OFFLINE_COLOR);
+    }
+    GO.lcd.print("O");
+    GO.lcd.setTextColor(MAIN_TEXT_COLOR);
     GO.lcd.println(String(vms[i].id) + ": " + vms[i].name);
   }
 
