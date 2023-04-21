@@ -9,14 +9,16 @@ typedef struct {
   void (*function)();
 } MenuItem;
 
-void listNodes(Node* nodes, int numItems);
-void listContainers(Container* containers, int numItems);
-void listVMs(VM* vms, int numItems);
-void listDisks(Disk* disks, int numItems);
-void listPools(Pool* pools, int numItems);
+void listNodes(Node* nodes, const int &numItems);
+void listContainers(Container* containers, const int &numItems);
+void listVMs(VM* vms, const int &numItems);
+void listDisks(Disk* disks, const int &numItems);
+void listPools(Pool* pools, const int &numItems);
 void mainMenu();
 void manageContainerMenu();
 void manageVMMenu();
+
+typedef void (*MenuPrintCallback)(void*);
 
 extern int selectedItem;
 extern int selectedPage;

@@ -9,7 +9,7 @@ const int BACKGROUND_COLOR = WHITE;
 const int TEXT_COLOR = BLACK;
 const int TEXT_SIZE = 2;
 
-String convertBytes(long long value)
+String convertBytes(const long long &value)
 {
   if (value > 1099511627776)
   {
@@ -30,7 +30,7 @@ String convertBytes(long long value)
   return String(value) + " Bytes";
 }
 
-String convertTime(long long value)
+String convertTime(const long long &value)
 {
   if (value > 3600)
   {
@@ -43,7 +43,7 @@ String convertTime(long long value)
   return String(value) + " secs";
 }
 
-void printNodeStats(Node node)
+void printNodeStats(const Node &node)
 {
   GO.lcd.fillScreen(BACKGROUND_COLOR);
   GO.lcd.setCursor(0, 0);
@@ -63,7 +63,7 @@ void printNodeStats(Node node)
   GO.lcd.println("Max Disk: " + convertBytes(node.maxdisk));
 }
 
-void printContainerStats(Container container)
+void printContainerStats(const Container &container)
 {
 
   GO.lcd.fillScreen(BACKGROUND_COLOR);
@@ -79,7 +79,7 @@ void printContainerStats(Container container)
   GO.lcd.println("Max Disk: " + convertBytes(container.maxdisk));
 }
 
-void printVMStats(VM vm)
+void printVMStats(const VM &vm)
 {
 
   GO.lcd.fillScreen(BACKGROUND_COLOR);
@@ -94,7 +94,7 @@ void printVMStats(VM vm)
   GO.lcd.println("Max Disk: " + convertBytes(vm.maxdisk));
 }
 
-void printDiskStats(Disk disk)
+void printDiskStats(const Disk &disk)
 {
 
   GO.lcd.fillScreen(BACKGROUND_COLOR);
@@ -112,7 +112,7 @@ void printDiskStats(Disk disk)
   GO.lcd.println("Health: " + disk.health);
 }
 
-void printPoolStats(Pool pool)
+void printPoolStats(const Pool &pool)
 {
 
   GO.lcd.fillScreen(BACKGROUND_COLOR);
@@ -156,7 +156,7 @@ void containerInfo()
   selectedPage = 0;
   int numContainers;
 
-  Container *containers = getContainerInfo(&numContainers, selectedNode);
+  Container *containers = getContainerInfo(numContainers, selectedNode);
 
   listContainers(containers, numContainers);
   delete[] containers;
@@ -186,7 +186,7 @@ void vmInfo()
   selectedItem = 0;
   selectedPage = 0;
   int numVMs;
-  VM *vms = getVMInfo(&numVMs, selectedNode);
+  VM *vms = getVMInfo(numVMs, selectedNode);
   listVMs(vms, numVMs);
   delete[] vms;
   unsigned long lastUpdate = millis();
@@ -213,7 +213,7 @@ void diskInfo()
   selectedItem = 0;
   selectedPage = 0;
   int numDisks;
-  Disk *disks = getDiskInfo(&numDisks, selectedNode);
+  Disk *disks = getDiskInfo(numDisks, selectedNode);
 
   listDisks(disks, numDisks);
   delete[] disks;
@@ -236,7 +236,7 @@ void poolInfo()
   selectedItem = 0;
   selectedPage = 0;
   int numPools;
-  Pool *pools = getPoolInfo(&numPools, selectedNode);
+  Pool *pools = getPoolInfo(numPools, selectedNode);
 
   listPools(pools, numPools);
   delete[] pools;

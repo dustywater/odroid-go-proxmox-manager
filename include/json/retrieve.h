@@ -52,11 +52,13 @@ typedef struct {
   String health;
 } Pool;
 
-Node *getNodeInfo(int *numNodes);
-Container *getContainerInfo(int *numContainers, String node);
-VM *getVMInfo(int *numVMs, String node);
-Disk *getDiskInfo(int *numDisks, String node);
-Pool *getPoolInfo(int *numPools, String node);
+Node *getNodeInfo(int &numNodes);
+Container *getContainerInfo(int &numContainers, const String &node);
+VM *getVMInfo(int &numVMs, const String &node);
+Disk *getDiskInfo(int &numDisks, const String &node);
+Pool *getPoolInfo(int &numPools, const String &node);
+
+typedef void (*ProcessDataCallback)(DynamicJsonDocument&, int&, void*&);
 
 
 #endif /* JSON_RETRIEVE_H */

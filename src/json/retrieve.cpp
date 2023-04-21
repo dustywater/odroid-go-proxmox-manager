@@ -5,126 +5,139 @@
 #include <json/retrieve.h>
 #include <stdexcept>
 
-Node *getNodeInfo(int *numNodes)
+/// @brief This is a callback function to process the json data of a node provided by the API into an array of Node structs.
+/// @param doc A reference to the json document containing the data from the API.
+/// @param numNodes A reference to an integer containing the number of nodes retrieved from the API.
+/// @param nodeArray A pointer to the array used to hold the nodes once they have been processed.
+void processNodeData(DynamicJsonDocument &doc, int &numNodes, void *&nodeArray)
 {
-  HTTPClient http;
-  String apiAddress = PROXMOX_ADDRESS + "/api2/json/nodes/";
-  String auth = "PVEAPIToken=" + PROXMOX_TOKEN_USER + "!" + PROXMOX_TOKEN_NAME + "=" + PROXMOX_TOKEN_SECRET;
-  char authc[auth.length() + 1];
-  auth.toCharArray(authc, auth.length() + 1);
-  http.begin(apiAddress);
-  http.setAuthorization(authc);
-  int httpCode = http.GET();
+  JsonArray nodes = doc["data"].as<JsonArray>();
+  Node *array = new Node[nodes.size()];
 
-  if (httpCode > 0)
+  for (int i = 0; i < nodes.size(); i++)
   {
-    String json = http.getString();
-    DynamicJsonDocument doc(8096);
-    deserializeJson(doc, json);
-
-    JsonArray nodes = doc["data"].as<JsonArray>();
-    Node *nodeArray = new Node[nodes.size()];
-
-    for (int i = 0; i < nodes.size(); i++)
-    {
-      nodeArray[i].name = nodes[i]["node"].as<String>();
-      nodeArray[i].cpu = nodes[i]["cpu"].as<float>();
-      nodeArray[i].threads = nodes[i]["maxcpu"].as<int>();
-      nodeArray[i].onlineStatus = nodes[i]["status"].as<String>();
-      nodeArray[i].mem = nodes[i]["mem"].as<long long>();
-      nodeArray[i].maxmem = nodes[i]["maxmem"].as<long long>();
-      nodeArray[i].disk = nodes[i]["disk"].as<long long>();
-      nodeArray[i].maxdisk = nodes[i]["maxdisk"].as<long long>();
-      nodeArray[i].uptime = nodes[i]["uptime"].as<long long>();
-    }
-
-    *numNodes = nodes.size();
-    return nodeArray;
-  }
-  throw std::runtime_error("Can't get node info: HTTP request failed with code: " + httpCode);
-}
-
-Container *getContainerInfo(int *numContainers, String node)
-{
-  HTTPClient http;
-  String apiAddress = PROXMOX_ADDRESS + "/api2/json/nodes/" + node + "/lxc";
-  String auth = "PVEAPIToken=" + PROXMOX_TOKEN_USER + "!" + PROXMOX_TOKEN_NAME + "=" + PROXMOX_TOKEN_SECRET;
-  char authc[auth.length() + 1];
-  auth.toCharArray(authc, auth.length() + 1);
-  http.begin(apiAddress);
-  http.setAuthorization(authc);
-  int httpCode = http.GET();
-
-  if (httpCode > 0)
-  {
-    String json = http.getString();
-    DynamicJsonDocument doc(8096);
-    deserializeJson(doc, json);
-    JsonArray containers = doc["data"].as<JsonArray>();
-    Container *containerArray = new Container[containers.size()];
-
-    for (int i = 0; i < containers.size(); i++)
-    {
-      containerArray[i].name = containers[i]["name"].as<String>();
-      containerArray[i].id = containers[i]["vmid"].as<int>();
-      containerArray[i].onlineStatus = containers[i]["status"].as<String>();
-      containerArray[i].maxmem = containers[i]["maxmem"].as<long long>();
-      containerArray[i].maxdisk = containers[i]["maxdisk"].as<long long>();
-      containerArray[i].uptime = containers[i]["uptime"].as<long long>();
-    }
-
-    *numContainers = containers.size();
-    return containerArray;
+    array[i].name = nodes[i]["node"].as<String>();
+    array[i].cpu = nodes[i]["cpu"].as<float>();
+    array[i].threads = nodes[i]["maxcpu"].as<int>();
+    array[i].onlineStatus = nodes[i]["status"].as<String>();
+    array[i].mem = nodes[i]["mem"].as<long long>();
+    array[i].maxmem = nodes[i]["maxmem"].as<long long>();
+    array[i].disk = nodes[i]["disk"].as<long long>();
+    array[i].maxdisk = nodes[i]["maxdisk"].as<long long>();
+    array[i].uptime = nodes[i]["uptime"].as<long long>();
   }
 
-  throw std::runtime_error("Can't get container info: HTTP request failed with code: " + httpCode);
+  numNodes = nodes.size();
+  nodeArray = array;
 }
 
-VM *getVMInfo(int *numVMs, String node)
+/// @brief This is a callback function to process the json data of a container provided by the api into an array of Container structs.
+/// @param doc A reference to the json document containing the data from the API.
+/// @param numContainers A reference to an integer containing the number of containers retrieved from the API.
+/// @param containerArray A pointer to the array used to hold the containers once they have been processed.
+void processContainerData(DynamicJsonDocument &doc, int &numContainers, void *&containerArray)
 {
-  HTTPClient http;
-  String apiAddress = PROXMOX_ADDRESS + "/api2/json/nodes/" + node + "/qemu";
-  String auth = "PVEAPIToken=" + PROXMOX_TOKEN_USER + "!" + PROXMOX_TOKEN_NAME + "=" + PROXMOX_TOKEN_SECRET;
-  char authc[auth.length() + 1];
-  auth.toCharArray(authc, auth.length() + 1);
-  http.begin(apiAddress);
-  http.setAuthorization(authc);
-  int httpCode = http.GET();
+  JsonArray containers = doc["data"].as<JsonArray>();
+  Container *array = new Container[containers.size()];
 
-  if (httpCode > 0)
+  for (int i = 0; i < containers.size(); i++)
   {
-    String json = http.getString();
-    DynamicJsonDocument doc(8096);
-    deserializeJson(doc, json);
-    JsonArray vms = doc["data"].as<JsonArray>();
-    VM *vmArray = new VM[vms.size()];
-
-    for (int i = 0; i < vms.size(); i++)
-    {
-      vmArray[i].name = vms[i]["name"].as<String>();
-      vmArray[i].id = vms[i]["vmid"].as<int>();
-      vmArray[i].onlineStatus = vms[i]["status"].as<String>();
-      vmArray[i].maxmem = vms[i]["maxmem"].as<long long>();
-      vmArray[i].maxdisk = vms[i]["maxdisk"].as<long long>();
-      vmArray[i].uptime = vms[i]["uptime"].as<long long>();
-      vmArray[i].netin = vms[i]["netin"].as<long long>();
-      vmArray[i].netout = vms[i]["netout"].as<long long>();
-    }
-
-    *numVMs = vms.size();
-    return vmArray;
+    array[i].name = containers[i]["name"].as<String>();
+    array[i].id = containers[i]["vmid"].as<int>();
+    array[i].onlineStatus = containers[i]["status"].as<String>();
+    array[i].maxmem = containers[i]["maxmem"].as<long long>();
+    array[i].maxdisk = containers[i]["maxdisk"].as<long long>();
+    array[i].uptime = containers[i]["uptime"].as<long long>();
   }
-  throw std::runtime_error("Can't get VM info: HTTP request failed with code: " + httpCode);
+
+  numContainers = containers.size();
+  containerArray = array;
 }
 
-Disk *getDiskInfo(int *numDisks, String node)
+/// @brief This is a callback function to process the json data of a VM provided by the api into an array of VM structs.
+/// @param doc A reference to the json document containing the data from the API.
+/// @param numVMs A reference to an integer containing the number of VMs retrieved from the API.
+/// @param vmArray A pointer to the array used to hold the VMs once they have been processed.
+void processVMData(DynamicJsonDocument &doc, int &numVMs, void *&vmArray)
+{
+  JsonArray vms = doc["data"].as<JsonArray>();
+  VM *array = new VM[vms.size()];
+
+  for (int i = 0; i < vms.size(); i++)
+  {
+    array[i].name = vms[i]["name"].as<String>();
+    array[i].id = vms[i]["vmid"].as<int>();
+    array[i].onlineStatus = vms[i]["status"].as<String>();
+    array[i].maxmem = vms[i]["maxmem"].as<long long>();
+    array[i].maxdisk = vms[i]["maxdisk"].as<long long>();
+    array[i].uptime = vms[i]["uptime"].as<long long>();
+    array[i].netin = vms[i]["netin"].as<long long>();
+    array[i].netout = vms[i]["netout"].as<long long>();
+  }
+
+  numVMs = vms.size();
+  vmArray = array;
+}
+
+/// @brief This is a callback function to process the json data of a disk provided by the api into an array of disk structs.
+/// @param doc A reference to the json document containing the data from the API.
+/// @param numDisks A reference to an integer containing the number of disks retrieved from the API.
+/// @param diskArray A pointer to the array used to hold the disks once they have been processed.
+void processDiskData(DynamicJsonDocument &doc, int &numDisks, void *&diskArray)
+{
+  JsonArray disks = doc["data"].as<JsonArray>();
+  Disk *array = new Disk[disks.size()];
+
+  for (int i = 0; i < disks.size(); i++)
+  {
+    array[i].devpath = disks[i]["devpath"].as<String>();
+    array[i].size = disks[i]["size"].as<long long>();
+    array[i].used = disks[i]["used"].as<String>();
+    array[i].serial = disks[i]["serial"].as<String>();
+    array[i].model = disks[i]["model"].as<String>();
+    array[i].vendor = disks[i]["vendor"].as<String>();
+    array[i].health = disks[i]["health"].as<String>();
+  }
+
+  numDisks = disks.size();
+  diskArray = array;
+}
+
+/// @brief This is a callback function to process the json data of a ZFS pool provided by the api into an array of Pool structs.
+/// @param doc A reference to the json document containing the data from the API.
+/// @param numPools A reference to an integer containing the number of pools retrieved from the API.
+/// @param poolArray A pointer to the array used to hold the pools once they have been processed.
+void processPoolData(DynamicJsonDocument &doc, int &numPools, void *&poolArray)
+{
+  JsonArray pools = doc["data"].as<JsonArray>();
+  Pool *array = new Pool[pools.size()];
+
+  for (int i = 0; i < pools.size(); i++)
+  {
+    array[i].name = pools[i]["name"].as<String>();
+    array[i].free = pools[i]["free"].as<long long>();
+    array[i].size = pools[i]["size"].as<long long>();
+    array[i].health = pools[i]["health"].as<String>();
+  }
+
+  numPools = pools.size();
+  poolArray = array;
+}
+
+/// @brief This is the main function to retrieve data from the API. Is is a generic function to handle retrieving all the data for the program.
+/// @tparam T The type of the item being retrieved.
+/// @param apiAddress The API path to get the appropriate data.
+/// @param numItems A reference to an integer to store the number of items retrieved from the API.
+/// @param processData A callback function to process the data coming in from the API.
+/// @return The array of items populated by the process function is returned in the type defined by T.
+template <typename T>
+T *apiCall(const String &apiAddress, int &numItems, ProcessDataCallback processData)
 {
   HTTPClient http;
-  String apiAddress = PROXMOX_ADDRESS + "/api2/json/nodes/" + node + "/disks/list";
+  http.begin(PROXMOX_ADDRESS + apiAddress);
   String auth = "PVEAPIToken=" + PROXMOX_TOKEN_USER + "!" + PROXMOX_TOKEN_NAME + "=" + PROXMOX_TOKEN_SECRET;
   char authc[auth.length() + 1];
   auth.toCharArray(authc, auth.length() + 1);
-  http.begin(apiAddress);
   http.setAuthorization(authc);
   int httpCode = http.GET();
 
@@ -133,56 +146,60 @@ Disk *getDiskInfo(int *numDisks, String node)
     String json = http.getString();
     DynamicJsonDocument doc(32768);
     deserializeJson(doc, json);
-    JsonArray disks = doc["data"].as<JsonArray>();
-    Disk *diskArray = new Disk[disks.size()];
 
-    for (int i = 0; i < disks.size(); i++)
-    {
-      Serial.println(disks[i]["devpath"].as<String>());
-      diskArray[i].devpath = disks[i]["devpath"].as<String>();
-      diskArray[i].size = disks[i]["size"].as<long long>();
-      diskArray[i].used = disks[i]["used"].as<String>();
-      diskArray[i].serial = disks[i]["serial"].as<String>();
-      diskArray[i].model = disks[i]["model"].as<String>();
-      diskArray[i].vendor = disks[i]["vendor"].as<String>();
-      diskArray[i].health = disks[i]["health"].as<String>();
-    }
+    void *itemArray = nullptr;
+    processData(doc, numItems, itemArray);
 
-    *numDisks = disks.size();
-    return diskArray;
+    return static_cast<T *>(itemArray);
   }
-  throw std::runtime_error("Can't get disk info: HTTP request failed with code: " + httpCode);
+  throw std::runtime_error("HTTP request failed with code: " + httpCode);
 }
 
-Pool *getPoolInfo(int *numPools, String node)
+/// @brief Function to retrieve node data from the API. Calls the apiCall() function with the appropriate parameters for nodes.
+/// @param numNodes A reference to an integer to hold the number of nodes retrieved.
+/// @return The array of nodes created by the apiCall() function.
+Node *getNodeInfo(int &numNodes)
 {
-  HTTPClient http;
-  String apiAddress = PROXMOX_ADDRESS + "/api2/json/nodes/" + node + "/disks/zfs";
-  String auth = "PVEAPIToken=" + PROXMOX_TOKEN_USER + "!" + PROXMOX_TOKEN_NAME + "=" + PROXMOX_TOKEN_SECRET;
-  char authc[auth.length() + 1];
-  auth.toCharArray(authc, auth.length() + 1);
-  http.begin(apiAddress);
-  http.setAuthorization(authc);
-  int httpCode = http.GET();
+  String apiAddress = "/api2/json/nodes/";
+  return apiCall<Node>(apiAddress, numNodes, processNodeData);
+}
 
-  if (httpCode > 0)
-  {
-    String json = http.getString();
-    DynamicJsonDocument doc(32768);
-    deserializeJson(doc, json);
-    JsonArray pools = doc["data"].as<JsonArray>();
-    Pool *poolArray = new Pool[pools.size()];
+/// @brief Function to retrieve container data from the API. Calls the apiCall() function with the appropriate parameters for containers.
+/// @param numContainers A reference to an integer to hold the number of containers retrieved.
+/// @param node A reference to a string which defines which node we are retrieving container data from.
+/// @return The array of containers created by the apiCall() function.
+Container *getContainerInfo(int &numContainers, const String &node)
+{
+  String apiAddress = "/api2/json/nodes/" + node + "/lxc";
+  return apiCall<Container>(apiAddress, numContainers, processContainerData);
+}
 
-    for (int i = 0; i < pools.size(); i++)
-    {
-      poolArray[i].name = pools[i]["name"].as<String>();
-      poolArray[i].free = pools[i]["free"].as<long long>();
-      poolArray[i].size = pools[i]["size"].as<long long>();
-      poolArray[i].health = pools[i]["health"].as<String>();
-    }
+/// @brief Function to retrieve VM data from the API. Calls the apiCall() function with the appropriate parameters for VMs.
+/// @param numVMs A reference to an integer to hold the number of VMs retrieved.
+/// @param node A reference to a string which defines which node we are retrieving VM data from.
+/// @return The array of VMs created by the apiCall() function.
+VM *getVMInfo(int &numVMs, const String &node)
+{
+  String apiAddress = "/api2/json/nodes/" + node + "/qemu";
+  return apiCall<VM>(apiAddress, numVMs, processVMData);
+}
 
-    *numPools = pools.size();
-    return poolArray;
-  }
-  throw std::runtime_error("Can't get pool info: HTTP request failed with code: " + httpCode);
+/// @brief Function to retrieve disk data from the API. Calls the apiCall() function with the appropriate parameters for disks.
+/// @param numDisks A reference to an integer to hold the number of disks retrieved.
+/// @param node A reference to a string which defines which node we are retrieving disk data from.
+/// @return The array of disks created by the apiCall() function.
+Disk *getDiskInfo(int &numDisks, const String &node)
+{
+  String apiAddress = "/api2/json/nodes/" + node + "/disks/list";
+  return apiCall<Disk>(apiAddress, numDisks, processDiskData);
+}
+
+/// @brief Function to retrieve pool data from the API. Calls the apiCall() function with the appropriate parameters for pools.
+/// @param numPools A reference to an integer to hold the number of pools retrieved.
+/// @param node A reference to a string which defines which node we are retrieving pool data from.
+/// @return The array of pools created by the apiCall() function.
+Pool *getPoolInfo(int &numPools, const String &node)
+{
+  String apiAddress = "/api2/json/nodes/" + node + "/disks/zfs";
+  return apiCall<Pool>(apiAddress, numPools, processPoolData);
 }
