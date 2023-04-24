@@ -3,9 +3,13 @@
 #include <WiFi.h>
 #include <pin.h>
 #include <json/retrieve.h>
+
+
 /**
-   Display an error on the screen
-*/
+ * @brief Function to display an error on the screen. Displays the error in red text for 3 seconds before continuing.
+ * 
+ * @param message The message to display.
+ */
 void displayError(String message) {
   GO.lcd.clearDisplay();
   GO.lcd.setCursor(0, 0);
@@ -15,23 +19,31 @@ void displayError(String message) {
   delay(3000);
 }
 
+/**
+ * @brief Function to connect to a WiFi network. Attempts to connect to the network using the SSID and password defined in the header file. 
+ * Displays a connecting message until the network has connected.
+ * 
+ */
 void connectWiFi() {
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   GO.lcd.clearDisplay();
-  GO.lcd.setCursor(0, 0);
   GO.lcd.setTextColor(WHITE);
   GO.lcd.setTextSize(2);
+  GO.lcd.setCursor(0,0);
   GO.lcd.print("Connecting");
-
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
     GO.lcd.print(".");
   }
+
 }
 
-
+/**
+ * @brief Function to listen for input when entering a pin. Waits for the user to press a button and then returns a value based on the button they have pressed.
+ * 
+ * @return int The value indicating which button was pressed.
+ */
 int pinListener()
 {
   delay(300);
@@ -82,6 +94,14 @@ int pinListener()
   return 7;
 }
 
+/**
+ * @brief The main function for the pin system. Uses the pinListener() function to listen for input. Adds the user's input to a string. 
+ * Once the user is done and a start button press is detected, compares the string of the entered pin to the one defines in the header file.
+ * If the menu button is pressed the function sets the entered pin to blank and does not show an incorrect pin error. This will mean that the input is reset and the function starts again.
+ * 
+ * @return true The entered pin is correct.
+ * @return false The entered pin is incorrect.
+ */
 bool enterPin()
 {
   GO.lcd.clearDisplay();

@@ -5,31 +5,47 @@
 #include <odroid_go.h>
 #include <utils.h>
 
+// Constants for UI
 const int BACKGROUND_COLOR = WHITE;
 const int TEXT_COLOR = BLACK;
 const int TEXT_SIZE = 2;
 
+// How often to update the statistics on the screen.
+const int UPDATE_INTERVAL = 3000;
+
+/**
+ * @brief Function to convert bytes to more human readable formats. Works by checking if the value is over a certain size before dividing it and adding the appropriate label.
+ *
+ * @param value The value in bytes to convert.
+ * @return String The converted value in a human readable string.
+ */
 String convertBytes(const long long &value)
 {
   if (value > 1099511627776)
   {
-    return String(value / 1099511627776) + " TB";
+    return String(value / 1099511627776) + " TiB";
   }
   if (value > 1073741824)
   {
-    return String(value / 1073741824) + " GB";
+    return String(value / 1073741824) + " GiB";
   }
   if (value > 1048576)
   {
-    return String(value / 1048576) + " MB";
+    return String(value / 1048576) + " MiB";
   }
   if (value > 1024)
   {
-    return String(value / 1024) + " KB";
+    return String(value / 1024) + " KiB";
   }
   return String(value) + " Bytes";
 }
 
+/**
+ * @brief Function convert seconds to more human readable formats. Works by checking if the value is over a certain number of seconds and then divides it before adding a label.
+ *
+ * @param value The time in seconds.
+ * @return String The converted time as a human readable string.
+ */
 String convertTime(const long long &value)
 {
   if (value > 3600)
@@ -43,6 +59,11 @@ String convertTime(const long long &value)
   return String(value) + " secs";
 }
 
+/**
+ * @brief Function to print the stats for a node. Uses convertTime() and convertBytes() to make values human friendly.
+ *
+ * @param node The node to print the statistics of.
+ */
 void printNodeStats(const Node &node)
 {
   GO.lcd.fillScreen(BACKGROUND_COLOR);
@@ -63,6 +84,11 @@ void printNodeStats(const Node &node)
   GO.lcd.println("Max Disk: " + convertBytes(node.maxdisk));
 }
 
+/**
+ * @brief Function to print the stats for a container. Uses convertTime() and convertBytes() to make values human friendly.
+ *
+ * @param container The container to print the statistics of.
+ */
 void printContainerStats(const Container &container)
 {
 
@@ -79,6 +105,11 @@ void printContainerStats(const Container &container)
   GO.lcd.println("Max Disk: " + convertBytes(container.maxdisk));
 }
 
+/**
+ * @brief Function to print the stats for a VM. Uses convertTime() and convertBytes() to make values human friendly.
+ *
+ * @param vm The VM to print the statistics of.
+ */
 void printVMStats(const VM &vm)
 {
 
@@ -94,6 +125,11 @@ void printVMStats(const VM &vm)
   GO.lcd.println("Max Disk: " + convertBytes(vm.maxdisk));
 }
 
+/**
+ * @brief Function to print the stats for a disk. Uses convertBytes() to make values human friendly.
+ *
+ * @param disk The disk to print the statistics of.
+ */
 void printDiskStats(const Disk &disk)
 {
 
@@ -112,6 +148,11 @@ void printDiskStats(const Disk &disk)
   GO.lcd.println("Health: " + disk.health);
 }
 
+/**
+ * @brief Function to print the stats for a pool. Uses convertBytes() to make values human friendly.
+ *
+ * @param pool The pool to print statistics of.
+ */
 void printPoolStats(const Pool &pool)
 {
 
@@ -127,14 +168,18 @@ void printPoolStats(const Pool &pool)
   GO.lcd.println("Health: " + pool.health);
 }
 
+/**
+ * @brief The calling function to print and retrieve node information.
+ * Retrieves the node statistics from the API by calling the getNode() function before using the printNodeStats() function to update the statistics on the screen at the specified interval.
+ * Returns to the main menu if the back button is pressed.
+ */
 void nodeInfo()
 {
   Serial.println("nodeinfo");
-  unsigned long lastUpdate = millis();
-  int updateInterval = 3000;
+  long long lastUpdate = 0;
   while (true)
   {
-    if (lastUpdate + updateInterval < millis())
+    if (lastUpdate + UPDATE_INTERVAL < millis())
     {
       printNodeStats(getNode(selectedNode));
       lastUpdate = millis();
@@ -149,23 +194,30 @@ void nodeInfo()
   mainMenu();
 }
 
+/**
+ * @brief The calling function to print and retrieve container information.
+ * Retrieves the list of containers from the API by calling the getContainerInfo() function. Then asks the user to select a container using listContainers().
+ * After a container is selected, uses the getContainer() function to retrieve the container statistics and then prints them on the screen using the printContainerStats() function at the specified interval.
+ *
+ * Returns to the previous screen if the back button is pressed.
+ */
 void containerInfo()
 {
   Serial.println("container info");
   selectedItem = 0;
   selectedPage = 0;
+  selectedLXC = 0;
   int numContainers;
 
   Container *containers = getContainerInfo(numContainers, selectedNode);
 
   listContainers(containers, numContainers);
   delete[] containers;
-  unsigned long lastUpdate = millis();
-  int updateInterval = 3000;
+  long long lastUpdate = 0;
 
-  while (true)
+  while (selectedLXC > 0)
   {
-    if (lastUpdate + updateInterval < millis())
+    if (lastUpdate + UPDATE_INTERVAL < millis())
     {
       printContainerStats(getContainer(selectedLXC, selectedNode));
       lastUpdate = millis();
@@ -174,26 +226,34 @@ void containerInfo()
     GO.update();
     if (GO.BtnB.isPressed())
     {
-      mainMenu();
+      containerInfo();
       break;
     }
   }
 }
 
+/**
+ * @brief The calling function to print and retrieve VM information.
+ * Retrieves the list of VMs from the API by calling the getVMInfo() function. Then asks the user to select a VM using listVMs().
+ * After a VM is selected, uses the getVM() function to retrieve the VM statistics and then prints them on the screen using the printVMStats() function at the specified interval.
+ *
+ * Returns to the previous screen if the back button is pressed.
+ */
 void vmInfo()
 {
   Serial.println("vm info");
   selectedItem = 0;
   selectedPage = 0;
+  selectedVM = 0;
   int numVMs;
   VM *vms = getVMInfo(numVMs, selectedNode);
   listVMs(vms, numVMs);
   delete[] vms;
-  unsigned long lastUpdate = millis();
-  int updateInterval = 3000;
-  while (true)
+  unsigned long lastUpdate = 0;
+
+  while (selectedVM > 0)
   {
-    if (lastUpdate + updateInterval < millis())
+    if (lastUpdate + UPDATE_INTERVAL < millis())
     {
       printVMStats(getVM(selectedVM, selectedNode));
       lastUpdate = millis();
@@ -201,54 +261,76 @@ void vmInfo()
     GO.update();
     if (GO.BtnB.isPressed())
     {
-      mainMenu();
+      vmInfo();
       break;
     }
   }
 }
 
+/**
+ * @brief The calling function to print and retrieve disk information.
+ * Retrieves the list of disks from the API by calling the getDiskInfo() function. Then asks the user to select a disk using listDisks().
+ * After a disk is selected, uses the getDisk() function to retrieve the disk statistics and then prints them on the screen using the printDiskStats() function.
+ *
+ * Returns to the previous screen if the back button is pressed.
+ */
 void diskInfo()
 {
   Serial.println("disk info");
   selectedItem = 0;
   selectedPage = 0;
+  selectedDisk = "";
   int numDisks;
   Disk *disks = getDiskInfo(numDisks, selectedNode);
 
   listDisks(disks, numDisks);
   delete[] disks;
 
-  printDiskStats(getDisk(selectedDisk, selectedNode));
-  while (true)
+  if (selectedDisk != "")
   {
-    GO.update();
-    if (GO.BtnB.isPressed())
+    printDiskStats(getDisk(selectedDisk, selectedNode));
+    while (true)
     {
-      mainMenu();
-      break;
+      GO.update();
+      if (GO.BtnB.isPressed())
+      {
+        diskInfo();
+        break;
+      }
     }
   }
 }
 
+/**
+ * @brief The calling function to print and retrieve pool information.
+ * Retrieves the list of pools from the API by calling the getPoolInfo() function. Then asks the user to select a pool using listPools().
+ * After a pool is selected, uses the getPool() function to retrieve the pool statistics and then prints them on the screen using the printPoolStats() function.
+ *
+ * Returns to the previous screen if the back button is pressed.
+ */
 void poolInfo()
 {
   Serial.println("pool info");
   selectedItem = 0;
   selectedPage = 0;
+  selectedPool = "";
   int numPools;
   Pool *pools = getPoolInfo(numPools, selectedNode);
 
   listPools(pools, numPools);
   delete[] pools;
 
-  printPoolStats(getPool(selectedPool, selectedNode));
-  while (true)
+  if (selectedPool != "")
   {
-    GO.update();
-    if (GO.BtnB.isPressed())
+    printPoolStats(getPool(selectedPool, selectedNode));
+    while (true)
     {
-      mainMenu();
-      break;
+      GO.update();
+      if (GO.BtnB.isPressed())
+      {
+        mainMenu();
+        break;
+      }
     }
   }
 }

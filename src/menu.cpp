@@ -96,14 +96,14 @@ int buttonListener(const int &numItems)
   return 0;
 }
 
-/** @brief A function to draw a menu on the screen. This is for static menus which have a function tied to each item. 
- * Loops through the menu items and draws a ">" before the currently selected item. 
+/** @brief A function to draw a menu on the screen. This is for static menus which have a function tied to each item.
+ * Loops through the menu items and draws a ">" before the currently selected item.
  * After printing the items, listens for button inputs. If the A button is pressed then the function of the currently selected item is run. If the B button is pressed the function stops running (returning the previous menu).
- * If the directional pad buttons are pressed it means that the selected item or page has changed, so the function is run again to redraw the menu with the new values. 
-* @param menuItems An array of menuItems used to draw the menu.
-* @param numItems A reference to an int which holds the number of items in the menu.
-* @param menuTitle A reference to a string which holds the title of the menu.
-**/
+ * If the directional pad buttons are pressed it means that the selected item or page has changed, so the function is run again to redraw the menu with the new values.
+ * @param menuItems An array of menuItems used to draw the menu.
+ * @param numItems A reference to an int which holds the number of items in the menu.
+ * @param menuTitle A reference to a string which holds the title of the menu.
+ **/
 void drawMenu(MenuItem menuItems[], const int &numItems, const String &menuTitle)
 {
   GO.lcd.clearDisplay();
@@ -118,7 +118,9 @@ void drawMenu(MenuItem menuItems[], const int &numItems, const String &menuTitle
     if (selectedItem == i)
     {
       GO.lcd.print("> ");
-    } else {
+    }
+    else
+    {
       GO.lcd.print("  ");
     }
     GO.lcd.println(menuItems[i].name);
@@ -171,6 +173,12 @@ void manageContainerMenu()
   mainMenu();
 }
 
+/**
+ * @brief Callback function to print a container in the menu. Prints an online indicator which is red if offline and green if online.
+ * Then prints the id of the container followed by it's name.
+ *
+ * @param container The container to print.
+ */
 void containerMenuPrint(void *container)
 {
   Container *cont = static_cast<Container *>(container);
@@ -188,6 +196,12 @@ void containerMenuPrint(void *container)
   GO.lcd.println(String((*cont).id) + ": " + (*cont).name);
 };
 
+/**
+ * @brief Callback function to print a VM in the menu. Prints an online indicator which is red if offline and green if online.
+ * Then prints the id of the VM followed by it's name.
+ *
+ * @param vm The VM to print.
+ */
 void vmMenuPrint(void *vm)
 {
   VM *v = static_cast<VM *>(vm);
@@ -205,6 +219,12 @@ void vmMenuPrint(void *vm)
   GO.lcd.println(String((*v).id) + ": " + (*v).name);
 };
 
+/**
+ * @brief Callback function to print a node in the menu. Prints an online indicator which is red if offline and green if online.
+ * Then prints the name of the node.
+ *
+ * @param node
+ */
 void nodeMenuPrint(void *node)
 {
   Node *n = static_cast<Node *>(node);
@@ -222,18 +242,45 @@ void nodeMenuPrint(void *node)
   GO.lcd.println((*n).name);
 }
 
+/**
+ * @brief Callback function to print a disk in the menu. Prints the devpath of the disk.
+ *
+ * @param disk The disk to print
+ */
 void diskMenuPrint(void *disk)
 {
   Disk *d = static_cast<Disk *>(disk);
   GO.lcd.println((*d).devpath);
 }
 
+/**
+ * @brief Callback function to print a ZFS pool in the menu. Prints the name of the pool.
+ *
+ * @param pool The pool to print.
+ */
 void poolMenuPrint(void *pool)
 {
   Pool *p = static_cast<Pool *>(pool);
   GO.lcd.println((*p).name);
 }
 
+/**
+ * @brief Main function to print a menu of items (such as nodes or containers). First prints a title, followed by page number.
+ * Then prints the items starting at the page number multiplied by the number of items per page, and stops when the items per page is reached.
+ * Prints a ">" on the currently selected item to indicate that it is selected.
+ * Then uses the callback function to print the name of whatever type of item is being printed.
+ *
+ * After printing items listens for input from the user using the ButtonListener() function.
+ *
+ *
+ * @param items The array of items to print.
+ * @param item The item selected by the user.
+ * @param title The menu title.
+ * @param numItems The number of items in the array.
+ * @param itemSize The size of each item. Used for pointer calculation.
+ * @param backEnabled Whether the back button should be enabled for this menu.
+ * @param printMachine The callback function to print the name of the item.
+ */
 void listItems(void *items, void **item, const String title, const int &numItems, const int &itemSize, const bool &backEnabled, MenuPrintCallback printMachine)
 {
   GO.lcd.clearDisplay();
@@ -251,7 +298,9 @@ void listItems(void *items, void **item, const String title, const int &numItems
     if (selectedItem == i)
     {
       GO.lcd.print("> ");
-    } else {
+    }
+    else
+    {
       GO.lcd.print("  ");
     }
     printMachine(itemsAsBytes + i * itemSize);
@@ -274,43 +323,120 @@ void listItems(void *items, void **item, const String title, const int &numItems
   }
 }
 
+/**
+ * @brief The calling function for listing nodes. Calls the listItems() function with the appropriate parameters for nodes.
+ * Passes an item pointer to the function which gets set to whatever node has been selected during the listItems() function.
+ * Then sets the item pointer to the selected node.
+ *
+ * Passes false to the backEnabled parameter as the back button should be disabled on the node selection screen.
+ *
+ * Passes through nodeMenuPrint() as the callback function so that the correct names are printed.
+ *
+ * @param nodes The array of nodes being listed.
+ * @param numItems The number of nodes being listed.
+ */
 void listNodes(Node *nodes, const int &numItems)
 {
   void *item;
   listItems(nodes, &item, "Select Node", numItems, sizeof(Node), false, nodeMenuPrint);
-  Node *node = static_cast<Node *>(item);
-  Serial.println((*node).name);
-  selectedNode = (*node).name;
+
+  if (item != nullptr)
+  {
+    Node *node = static_cast<Node *>(item);
+    selectedNode = (*node).name;
+  }
 }
 
+/**
+ * @brief The calling function for listing containers. Calls the listItems() function with the appropriate parameters for containers.
+ * Passes an item pointer to the function which gets set to whatever container has been selected during the listItems() function.
+ * Then sets the item pointer to the selected container.
+ *
+ * Passes true to the backEnabled parameter as the back button should be enabled on this screen.
+ *
+ * Passes through containerMenuPrint() as the callback function so that the correct names are printed.
+ *
+ * @param containers The array of containers to list.
+ * @param numItems The number of containers to list.
+ */
 void listContainers(Container *containers, const int &numItems)
 {
   void *item;
   listItems(containers, &item, "Select Container", numItems, sizeof(Container), true, containerMenuPrint);
-  Container *container = static_cast<Container *>(item);
-  selectedLXC = (*container).id;
+
+  if (item != nullptr)
+  {
+    Container *container = static_cast<Container *>(item);
+    selectedLXC = (*container).id;
+  }
 }
 
+/**
+ * @brief The calling function for listing VMs. Calls the listItems() function with the appropriate parameters for VMs.
+ * Passes an item pointer to the function which gets set to whatever VM has been selected during the listItems() function.
+ * Then sets the item pointer to the selected VM.
+ *
+ * Passes true to the backEnabled parameter as the back button should be enabled on this screen.
+ *
+ * Passes through vmMenuPrint() as the callback function so that the correct names are printed.
+ *
+ * @param vms The array of VMs to list.
+ * @param numItems The number of VMs to list.
+ */
 void listVMs(VM *vms, const int &numItems)
 {
   void *item;
   listItems(vms, &item, "Select VM", numItems, sizeof(VM), true, vmMenuPrint);
-  VM *vm = static_cast<VM *>(item);
-  selectedVM = (*vm).id;
+  if (item != nullptr)
+  {
+    VM *vm = static_cast<VM *>(item);
+    selectedVM = (*vm).id;
+  }
 }
 
+/**
+ * @brief The calling function for listing disks. Calls the listItems() function with the appropriate parameters for disks.
+ * Passes an item pointer to the function which gets set to whatever disk has been selected during the listItems() function.
+ * Then sets the item pointer to the selected disk.
+ *
+ * Passes true to the backEnabled parameter as the back button should be enabled on this screen.
+ *
+ * Passes through diskMenuPrint() as the callback function so that the correct names are printed.
+ *
+ * @param disks The array of disks to list.
+ * @param numItems The number of disks to list.
+ */
 void listDisks(Disk *disks, const int &numItems)
 {
   void *item;
   listItems(disks, &item, "Select Disk", numItems, sizeof(Disk), true, diskMenuPrint);
-  Disk *disk = static_cast<Disk *>(item);
-  selectedDisk = (*disk).devpath;
+
+  if (item != nullptr)
+  {
+    Disk *disk = static_cast<Disk *>(item);
+    selectedDisk = (*disk).devpath;
+  }
 }
 
+/**
+ * @brief The calling function for listing pools. Calls the listItems() function with the appropriate parameters for pools.
+ * Passes an item pointer to the function which gets set to whatever pool has been selected during the listItems() function.
+ * Then sets the item pointer to the selected pool.
+ *
+ * Passes true to the backEnabled parameter as the back button should be enabled on this screen.
+ *
+ * Passes through poolMenuPrint() as the callback function so that the correct names are printed.
+ *
+ * @param pools The array of pools to list.
+ * @param numItems The number of pools to list.
+ */
 void listPools(Pool *pools, const int &numItems)
 {
   void *item;
   listItems(pools, &item, "Select Pool", numItems, sizeof(Pool), true, poolMenuPrint);
-  Pool *pool = static_cast<Pool *>(item);
-  selectedPool = (*pool).name;
+  if (item != nullptr)
+  {
+    Pool *pool = static_cast<Pool *>(item);
+    selectedPool = (*pool).name;
+  }
 }
