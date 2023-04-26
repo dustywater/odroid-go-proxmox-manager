@@ -176,7 +176,7 @@ void printPoolStats(const Pool &pool)
 void nodeInfo()
 {
   Serial.println("nodeinfo");
-  long long lastUpdate = 0;
+  unsigned long lastUpdate = 0;
   while (true)
   {
     if (lastUpdate + UPDATE_INTERVAL < millis())
@@ -213,7 +213,7 @@ void containerInfo()
 
   listContainers(containers, numContainers);
   delete[] containers;
-  long long lastUpdate = 0;
+  unsigned long lastUpdate = 0;
 
   while (selectedLXC > 0)
   {
