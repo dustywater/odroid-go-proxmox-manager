@@ -281,7 +281,13 @@ void poolMenuPrint(void *pool)
  * @param backEnabled Whether the back button should be enabled for this menu.
  * @param printMachine The callback function to print the name of the item.
  */
-void listItems(void *items, void **item, const String title, const int &numItems, const int &itemSize, const bool &backEnabled, MenuPrintCallback printMachine)
+void listItems(
+    void *items, void **item,
+    const String title,
+    const int &numItems,
+    const int &itemSize,
+    const bool &backEnabled,
+    MenuPrintCallback printMachine)
 {
   GO.lcd.clearDisplay();
   GO.lcd.setCursor(0, 0);
@@ -337,6 +343,7 @@ void listItems(void *items, void **item, const String title, const int &numItems
  */
 void listNodes(Node *nodes, const int &numItems)
 {
+  selectedItem = 0;
   void *item;
   listItems(nodes, &item, "Select Node", numItems, sizeof(Node), false, nodeMenuPrint);
 
@@ -361,6 +368,7 @@ void listNodes(Node *nodes, const int &numItems)
  */
 void listContainers(Container *containers, const int &numItems)
 {
+  selectedItem = 0;
   void *item;
   listItems(containers, &item, "Select Container", numItems, sizeof(Container), true, containerMenuPrint);
 
@@ -385,6 +393,7 @@ void listContainers(Container *containers, const int &numItems)
  */
 void listVMs(VM *vms, const int &numItems)
 {
+  selectedItem = 0;
   void *item;
   listItems(vms, &item, "Select VM", numItems, sizeof(VM), true, vmMenuPrint);
   if (item != nullptr)
@@ -408,6 +417,7 @@ void listVMs(VM *vms, const int &numItems)
  */
 void listDisks(Disk *disks, const int &numItems)
 {
+  selectedItem = 0;
   void *item;
   listItems(disks, &item, "Select Disk", numItems, sizeof(Disk), true, diskMenuPrint);
 
@@ -432,6 +442,7 @@ void listDisks(Disk *disks, const int &numItems)
  */
 void listPools(Pool *pools, const int &numItems)
 {
+  selectedItem = 0;
   void *item;
   listItems(pools, &item, "Select Pool", numItems, sizeof(Pool), true, poolMenuPrint);
   if (item != nullptr)

@@ -1,7 +1,7 @@
 #ifndef PIN_H
 #define PIN_H
 #include <Arduino.h>
-const String LOCK_PIN = "454";
+const String LOCK_PIN = "";
 /**
  *  0 = A Button
  *  1 = B Button

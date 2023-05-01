@@ -15,6 +15,7 @@ const int UPDATE_INTERVAL = 3000;
 
 /**
  * @brief Function to convert bytes to more human readable formats. Works by checking if the value is over a certain size before dividing it and adding the appropriate label.
+ * Casts the value to a double before dividing so that the value can be displayed more accurately.
  *
  * @param value The value in bytes to convert.
  * @return String The converted value in a human readable string.
@@ -23,19 +24,23 @@ String convertBytes(const long long &value)
 {
   if (value > 1099511627776)
   {
-    return String(value / 1099511627776) + " TiB";
+    double result = static_cast<double>(value) / 1099511627776.0;
+    return String(result, 2) + " TiB";
   }
   if (value > 1073741824)
   {
-    return String(value / 1073741824) + " GiB";
+    double result = static_cast<double>(value) / 1073741824.0;
+    return String(result, 2) + " GiB";
   }
   if (value > 1048576)
   {
-    return String(value / 1048576) + " MiB";
+    double result = static_cast<double>(value) / 1048576.0;
+    return String(result, 2) + " MiB";
   }
   if (value > 1024)
   {
-    return String(value / 1024) + " KiB";
+    double result = static_cast<double>(value) / 1024.0;
+    return String(result, 2) + " KiB";
   }
   return String(value) + " Bytes";
 }
@@ -230,6 +235,8 @@ void containerInfo()
       break;
     }
   }
+  
+  mainMenu();
 }
 
 /**
@@ -265,6 +272,7 @@ void vmInfo()
       break;
     }
   }
+  mainMenu();
 }
 
 /**
@@ -298,7 +306,9 @@ void diskInfo()
         break;
       }
     }
+    
   }
+  mainMenu();
 }
 
 /**
@@ -328,9 +338,10 @@ void poolInfo()
       GO.update();
       if (GO.BtnB.isPressed())
       {
-        mainMenu();
+        poolInfo();
         break;
       }
     }
   }
+  mainMenu();
 }
