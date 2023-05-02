@@ -363,6 +363,7 @@ void listNodes(Node *nodes, const int &numItems)
  *
  * @param containers The array of containers to list.
  * @param numItems The number of containers to list.
+ * @return The ID of the selected container, or 0 if none selected
  */
 int listContainers(Container *containers, const int &numItems)
 {
@@ -389,6 +390,7 @@ int listContainers(Container *containers, const int &numItems)
  *
  * @param vms The array of VMs to list.
  * @param numItems The number of VMs to list.
+ * @return The ID of the selected VM, or 0 if none selected
  */
 int listVMs(VM *vms, const int &numItems)
 {
@@ -414,6 +416,7 @@ int listVMs(VM *vms, const int &numItems)
  *
  * @param disks The array of disks to list.
  * @param numItems The number of disks to list.
+ * @return The devpath of the chosen disk, or an empty string if nothing has been selected
  */
 String listDisks(Disk *disks, const int &numItems)
 {
@@ -440,6 +443,7 @@ String listDisks(Disk *disks, const int &numItems)
  *
  * @param pools The array of pools to list.
  * @param numItems The number of pools to list.
+ * @return The name of the chosen pool, or a blank string if no pool selected
  */
 String listPools(Pool *pools, const int &numItems)
 {
