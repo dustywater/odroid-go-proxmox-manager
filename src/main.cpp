@@ -7,6 +7,11 @@
 #include <json/retrieve.h>
 #include <pin.h>
 
+
+/**
+ * @brief The main loop of the program. Runs the node selection screen, followed by the main menu.
+ * In the case of any errors the program will start this loop again.
+ */
 void loop()
 {
   // Check if still connected to a WiFi network. If not then display this to the user and then attempt to reconnect.
@@ -39,6 +44,10 @@ void loop()
   }
 }
 
+/**
+ * @brief Initial setup of the program. Run the pin system before attempting WiFi connection.
+ * Setup ends after successful connection to a WiFi network.
+ */
 void setup()
 {
   Serial.begin(115200);

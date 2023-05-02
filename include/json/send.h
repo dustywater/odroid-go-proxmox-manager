@@ -1,6 +1,8 @@
 #ifndef JSON_SEND_H
 #define JSON_SEND_H
 #include <Arduino.h>
+
+// Function declarations
 void restartVM(const String &node, const int &vmid);
 void restartContainer(const String &node, const int &containerid);
 void startVM(const String &node, const int &vmid);

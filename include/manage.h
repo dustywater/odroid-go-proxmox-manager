@@ -1,6 +1,7 @@
 #ifndef MANAGE_H
 #define MANAGE_H
 
+// Function declarations
 void vmRestart();
 void containerRestart();
 void vmStart();

@@ -1,6 +1,8 @@
 #ifndef PIN_H
 #define PIN_H
 #include <Arduino.h>
+
+/// @brief Constant which holds the pin code.
 const String LOCK_PIN = "";
 /**
  *  0 = A Button

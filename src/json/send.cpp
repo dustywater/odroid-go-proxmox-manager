@@ -33,6 +33,7 @@ void restartVM(const String &node, const int &vmid)
     apiSend(apiPath, "");
 }
 
+
 /// @brief The function to restart a given container. Calls the apiSend() function with the appropriate parameters to restart a container.
 /// @param node A reference to a string which contains the name of the node that is running the container that is being restarted.
 /// @param containerid A reference to an integer which holds the ID of the container being restarted.

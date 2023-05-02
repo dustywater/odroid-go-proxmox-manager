@@ -2,10 +2,13 @@
 #define WIFI_H_
 
 /**
- * Enter WiFi network and Proxmox information
+ * Enter WiFi network information
 */
 
+/// @brief The SSID of the WiFi network to connect to.
 const char* WIFI_SSID = "";
+
+/// @brief The password of the WiFi network to connect to.
 const char* WIFI_PASS = "";
 
 #endif

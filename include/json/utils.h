@@ -2,7 +2,8 @@
 #define JSON_UTILS_H
 #include <ArduinoJson.h>
 #include <json/retrieve.h>
-//JsonObject getNode(String name, JsonArray nodes);
+
+// Function declarations
 Node getNode(const String &name);
 Container getContainer(const int &id, const String &node);
 VM getVM(const int &id, const String &node);
