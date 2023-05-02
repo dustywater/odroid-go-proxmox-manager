@@ -1,9 +1,7 @@
 #include <menu.h>
 #include <Arduino.h>
 #include <odroid_go.h>
-#include <ArduinoJson.h>
 #include <statistics.h>
-#include <global.h>
 #include <manage.h>
 
 // UI constants for the menu system.
@@ -366,7 +364,7 @@ void listNodes(Node *nodes, const int &numItems)
  * @param containers The array of containers to list.
  * @param numItems The number of containers to list.
  */
-void listContainers(Container *containers, const int &numItems)
+int listContainers(Container *containers, const int &numItems)
 {
   selectedItem = 0;
   void *item;
@@ -375,8 +373,9 @@ void listContainers(Container *containers, const int &numItems)
   if (item != nullptr)
   {
     Container *container = static_cast<Container *>(item);
-    selectedLXC = (*container).id;
+    return (*container).id;
   }
+  return 0;
 }
 
 /**
@@ -391,7 +390,7 @@ void listContainers(Container *containers, const int &numItems)
  * @param vms The array of VMs to list.
  * @param numItems The number of VMs to list.
  */
-void listVMs(VM *vms, const int &numItems)
+int listVMs(VM *vms, const int &numItems)
 {
   selectedItem = 0;
   void *item;
@@ -399,8 +398,9 @@ void listVMs(VM *vms, const int &numItems)
   if (item != nullptr)
   {
     VM *vm = static_cast<VM *>(item);
-    selectedVM = (*vm).id;
+    return (*vm).id;
   }
+  return 0;
 }
 
 /**
@@ -415,7 +415,7 @@ void listVMs(VM *vms, const int &numItems)
  * @param disks The array of disks to list.
  * @param numItems The number of disks to list.
  */
-void listDisks(Disk *disks, const int &numItems)
+String listDisks(Disk *disks, const int &numItems)
 {
   selectedItem = 0;
   void *item;
@@ -424,8 +424,9 @@ void listDisks(Disk *disks, const int &numItems)
   if (item != nullptr)
   {
     Disk *disk = static_cast<Disk *>(item);
-    selectedDisk = (*disk).devpath;
+    return (*disk).devpath;
   }
+  return "";
 }
 
 /**
@@ -440,7 +441,7 @@ void listDisks(Disk *disks, const int &numItems)
  * @param pools The array of pools to list.
  * @param numItems The number of pools to list.
  */
-void listPools(Pool *pools, const int &numItems)
+String listPools(Pool *pools, const int &numItems)
 {
   selectedItem = 0;
   void *item;
@@ -448,6 +449,7 @@ void listPools(Pool *pools, const int &numItems)
   if (item != nullptr)
   {
     Pool *pool = static_cast<Pool *>(item);
-    selectedPool = (*pool).name;
+    return (*pool).name;
   }
+  return "";
 }

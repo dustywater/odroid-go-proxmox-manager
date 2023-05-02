@@ -1,6 +1,5 @@
 #include <json/retrieve.h>
 #include <json/utils.h>
-#include <global.h>
 #include <menu.h>
 #include <odroid_go.h>
 #include <utils.h>
@@ -211,12 +210,11 @@ void containerInfo()
   Serial.println("container info");
   selectedItem = 0;
   selectedPage = 0;
-  selectedLXC = 0;
   int numContainers;
 
   Container *containers = getContainerInfo(numContainers, selectedNode);
 
-  listContainers(containers, numContainers);
+  int selectedLXC = listContainers(containers, numContainers);
   delete[] containers;
   unsigned long lastUpdate = 0;
 
@@ -251,10 +249,9 @@ void vmInfo()
   Serial.println("vm info");
   selectedItem = 0;
   selectedPage = 0;
-  selectedVM = 0;
   int numVMs;
   VM *vms = getVMInfo(numVMs, selectedNode);
-  listVMs(vms, numVMs);
+  int selectedVM = listVMs(vms, numVMs);
   delete[] vms;
   unsigned long lastUpdate = 0;
 
@@ -287,11 +284,11 @@ void diskInfo()
   Serial.println("disk info");
   selectedItem = 0;
   selectedPage = 0;
-  selectedDisk = "";
+
   int numDisks;
   Disk *disks = getDiskInfo(numDisks, selectedNode);
 
-  listDisks(disks, numDisks);
+  String selectedDisk = listDisks(disks, numDisks);
   delete[] disks;
 
   if (selectedDisk != "")
@@ -323,11 +320,11 @@ void poolInfo()
   Serial.println("pool info");
   selectedItem = 0;
   selectedPage = 0;
-  selectedPool = "";
+
   int numPools;
   Pool *pools = getPoolInfo(numPools, selectedNode);
 
-  listPools(pools, numPools);
+  String selectedPool = listPools(pools, numPools);
   delete[] pools;
 
   if (selectedPool != "")

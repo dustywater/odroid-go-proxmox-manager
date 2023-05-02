@@ -1,7 +1,6 @@
 #include <json/retrieve.h>
 #include <json/utils.h>
 #include <json/send.h>
-#include <global.h>
 #include <menu.h>
 #include <odroid_go.h>
 #include <utils.h>
@@ -11,10 +10,10 @@ void vmRestart()
 {
     Serial.println("vm restart");
     selectedItem = 0;
-    selectedVM = 0;
+
     int numVMs;
     VM *vms = getVMInfo(numVMs, selectedNode);
-    listVMs(vms, numVMs);
+    int selectedVM = listVMs(vms, numVMs);
     delete[] vms;
     if (selectedVM > 0)
     {
@@ -32,10 +31,9 @@ void containerRestart()
 {
     Serial.println("lxc restart");
     selectedItem = 0;
-    selectedLXC = 0;
     int numContainers;
     Container *containers = getContainerInfo(numContainers, selectedNode);
-    listContainers(containers, numContainers);
+    int selectedLXC = listContainers(containers, numContainers);
     delete[] containers;
     if (selectedLXC > 0)
     {
@@ -54,10 +52,9 @@ void vmStart()
 {
     Serial.println("vm start");
     selectedItem = 0;
-    selectedVM = 0;
     int numVMs;
     VM *vms = getVMInfo(numVMs, selectedNode);
-    listVMs(vms, numVMs);
+    int selectedVM = listVMs(vms, numVMs);
     delete[] vms;
     if (selectedVM > 0)
     {
@@ -78,10 +75,9 @@ void containerStart()
 {
     Serial.println("lxc start");
     selectedItem = 0;
-    selectedLXC = 0;
     int numContainers;
     Container *containers = getContainerInfo(numContainers, selectedNode);
-    listContainers(containers, numContainers);
+    int selectedLXC = listContainers(containers, numContainers);
     delete[] containers;
     if (selectedLXC > 0)
     {
@@ -100,10 +96,9 @@ void vmStop()
 {
     Serial.println("vm stop");
     selectedItem = 0;
-    selectedVM = 0;
     int numVMs;
     VM *vms = getVMInfo(numVMs, selectedNode);
-    listVMs(vms, numVMs);
+    int selectedVM = listVMs(vms, numVMs);
     delete[] vms;
     if (selectedVM > 0)
     {
@@ -124,10 +119,9 @@ void containerStop()
 {
     Serial.println("lxc stop");
     selectedItem = 0;
-    selectedLXC = 0;
     int numContainers;
     Container *containers = getContainerInfo(numContainers, selectedNode);
-    listContainers(containers, numContainers);
+    int selectedLXC = listContainers(containers, numContainers);
     delete[] containers;
     if (selectedLXC > 0)
     {
