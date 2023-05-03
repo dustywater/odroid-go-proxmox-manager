@@ -5,7 +5,33 @@
 #include <json/retrieve.h>
 #include <stdexcept>
 
-/// @brief This is a callback function to process the json data of a node provided by the API into an array of Node structs.
+/// @brief Function to compare nodes by the uptime.
+/// @param a The first node to compare
+/// @param b The node to compare to
+/// @return True if the uptime of node b is higher, false if uptime of a is higher.
+bool compareNode(const Node &a, const Node &b) {
+  return a.uptime < b.uptime;
+}
+
+/// @brief Function to compare containers by ID.
+/// @param a The first container to compare
+/// @param b The container to compare to
+/// @return True if the ID of container b is higher, false if uptime of a is higher.
+bool compareContainer(const Container &a, const Container &b) {
+  return a.id < b.id;
+}
+
+
+/// @brief Function to compare VMs by ID.
+/// @param a The first VM to compare
+/// @param b The VM to compare to
+/// @return True if the ID of VM b is higher, false if ID of a is higher.
+bool compareVM(const VM &a, const VM &b) {
+  return a.id < b.id;
+}
+
+
+/// @brief This is a callback function to process the json data of a node provided by the API into an array of Node structs. Also sorts the nodes based on uptime.
 /// @param doc A reference to the json document containing the data from the API.
 /// @param numNodes A reference to an integer containing the number of nodes retrieved from the API.
 /// @param nodeArray A pointer to the array used to hold the nodes once they have been processed.
@@ -27,11 +53,14 @@ void processNodeData(DynamicJsonDocument &doc, int &numNodes, void *&nodeArray)
     array[i].uptime = nodes[i]["uptime"].as<long long>();
   }
 
+  // Sort the array
+  std::sort(array, array + nodes.size(), compareNode);
+
   numNodes = nodes.size();
   nodeArray = array;
 }
 
-/// @brief This is a callback function to process the json data of a container provided by the api into an array of Container structs.
+/// @brief This is a callback function to process the json data of a container provided by the api into an array of Container structs. Also sorts the containers based on id.
 /// @param doc A reference to the json document containing the data from the API.
 /// @param numContainers A reference to an integer containing the number of containers retrieved from the API.
 /// @param containerArray A pointer to the array used to hold the containers once they have been processed.
@@ -50,11 +79,29 @@ void processContainerData(DynamicJsonDocument &doc, int &numContainers, void *&c
     array[i].uptime = containers[i]["uptime"].as<long long>();
   }
 
+    // Record the starting time
+  unsigned long startTime = micros();
+
+  // Run the function you want to measure
+  std::sort(array, array + containers.size(), compareContainer);
+
+  // Calculate the elapsed time
+  unsigned long elapsedTime = micros() - startTime;
+
+  // Print the elapsed time in microseconds
+  Serial.print("Elapsed time: ");
+  Serial.print(elapsedTime);
+  Serial.println(" microseconds");
+
+
+  // Sort the array
+  //std::sort(array, array + containers.size(), compareContainer);
+
   numContainers = containers.size();
   containerArray = array;
 }
 
-/// @brief This is a callback function to process the json data of a VM provided by the api into an array of VM structs.
+/// @brief This is a callback function to process the json data of a VM provided by the api into an array of VM structs. Also sorts the VMs based on id.
 /// @param doc A reference to the json document containing the data from the API.
 /// @param numVMs A reference to an integer containing the number of VMs retrieved from the API.
 /// @param vmArray A pointer to the array used to hold the VMs once they have been processed.
@@ -74,6 +121,9 @@ void processVMData(DynamicJsonDocument &doc, int &numVMs, void *&vmArray)
     array[i].netin = vms[i]["netin"].as<long long>();
     array[i].netout = vms[i]["netout"].as<long long>();
   }
+
+  // Sort the array
+  std::sort(array, array + vms.size(), compareVM);
 
   numVMs = vms.size();
   vmArray = array;

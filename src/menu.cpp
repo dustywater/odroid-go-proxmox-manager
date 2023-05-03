@@ -65,7 +65,7 @@ int buttonListener(const int &numItems)
       Serial.println(selectedItem);
       break;
     }
-    if (GO.JOY_X.isAxisPressed() == 1 && selectedPage + 1 < (numItems / ITEMS_PER_PAGE))
+    if (GO.JOY_X.isAxisPressed() == 1 && selectedPage + 1 < (float(numItems) / ITEMS_PER_PAGE))
     {
       selectedPage++;
       selectedItem = selectedPage * ITEMS_PER_PAGE;
@@ -342,6 +342,7 @@ void listItems(
 void listNodes(Node *nodes, const int &numItems)
 {
   selectedItem = 0;
+  selectedPage = 0;
   void *item;
   listItems(nodes, &item, "Select Node", numItems, sizeof(Node), false, nodeMenuPrint);
 
@@ -368,6 +369,7 @@ void listNodes(Node *nodes, const int &numItems)
 int listContainers(Container *containers, const int &numItems)
 {
   selectedItem = 0;
+  selectedPage = 0;
   void *item;
   listItems(containers, &item, "Select Container", numItems, sizeof(Container), true, containerMenuPrint);
 
@@ -395,6 +397,7 @@ int listContainers(Container *containers, const int &numItems)
 int listVMs(VM *vms, const int &numItems)
 {
   selectedItem = 0;
+  selectedPage = 0;
   void *item;
   listItems(vms, &item, "Select VM", numItems, sizeof(VM), true, vmMenuPrint);
   if (item != nullptr)
@@ -421,6 +424,7 @@ int listVMs(VM *vms, const int &numItems)
 String listDisks(Disk *disks, const int &numItems)
 {
   selectedItem = 0;
+  selectedPage = 0;
   void *item;
   listItems(disks, &item, "Select Disk", numItems, sizeof(Disk), true, diskMenuPrint);
 
@@ -448,6 +452,7 @@ String listDisks(Disk *disks, const int &numItems)
 String listPools(Pool *pools, const int &numItems)
 {
   selectedItem = 0;
+  selectedPage = 0;
   void *item;
   listItems(pools, &item, "Select Pool", numItems, sizeof(Pool), true, poolMenuPrint);
   if (item != nullptr)
